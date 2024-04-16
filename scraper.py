@@ -22,7 +22,7 @@ def extract_next_links(url, resp):
         # resp.error
         return None
     else:
-        soup = BeautifulSoup(resp.text, 'html.parser')
+        soup = BeautifulSoup(resp.text, 'resp.raw_response.content')
         a_tags = soup.find_all('a')
         extracted_links = []
         for tag in a_tags:
@@ -33,7 +33,7 @@ def extract_next_links(url, resp):
                 normalized_links = [urljoin(base_url, link) for link in extracted_links]
                 # filter ??
                # final_links = filter_links(normalized_links)  # Implement this function as per your assignment requirements
-                return final_links
+                return normalized_links
 
 
 
