@@ -22,7 +22,7 @@ def extract_next_links(url, resp):
         # resp.error
         return None
     else:
-        soup = BeautifulSoup(resp.text, 'resp.raw_response.content')
+        soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         a_tags = soup.find_all('a')
         extracted_links = []
         for tag in a_tags:
