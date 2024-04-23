@@ -57,16 +57,17 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        # figure out what to do with robots.txt
-        # robots_url = f"{url}robots.txt"
-        # robots = robotparser.RobotFileParser()
-        # robots.set_url(robots_url)
-        # robots.read()
-        # allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
-        # if allowed:
-        #     return True
-        # else:
-        #     return False     
+        # FIGURE OUT HOW TO NOT GET IT TO BE STUCK
+        robots_url = f"{url}robots.txt" 
+        print(robots_url)
+        robots = robotparser.RobotFileParser()
+        robots.set_url(robots_url)
+        robots.read()
+        allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
+        if allowed:
+            return True
+        else:
+            return False     
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
