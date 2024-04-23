@@ -37,8 +37,8 @@ def extract_next_links(url, resp):
                 normalized_links = [urljoin(base_url, link) for link in extracted_links]
                 # filter ??
                # final_links = filter_links(normalized_links)  
-                print(normalized_links)
-                return normalized_links
+        #print(normalized_links)
+        return normalized_links
 
 #extract URL
 
@@ -51,15 +51,15 @@ def is_valid(url):
         if parsed.scheme not in set(["http", "https"]):
             return False
         # figure out what to do with robots.txt
-        robots_url = f"{url}robots.txt"
-        robots = robotparser.RobotFileParser()
-        robots.set_url(robots_url)
-        robots.read()
-        allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
-        if allowed:
-            return True
-        else:
-            return False     
+        # robots_url = f"{url}robots.txt"
+        # robots = robotparser.RobotFileParser()
+        # robots.set_url(robots_url)
+        # robots.read()
+        # allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
+        # if allowed:
+        #     return True
+        # else:
+        #     return False     
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
