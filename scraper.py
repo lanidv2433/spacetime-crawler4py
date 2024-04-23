@@ -10,6 +10,7 @@ url_counter = 0
 depth = 0
 
 def scraper(url, resp):
+    print("in scraper||||||||||||||||||||||||||||||||||||")
     links = extract_next_links(url, resp)
     if links:
         return [link for link in links if is_valid(link)]
@@ -31,6 +32,8 @@ def extract_next_links(url, resp):
     global cache
     global depth
     depth = 0
+    print("resp.url:", resp.url)
+    print("cache", cache)
     if resp.url in cache:
         return []
     
@@ -82,14 +85,13 @@ def is_valid(url):
             robots.read()
             allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
             print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
-            if allowed:
-                return allowed
+            return allowed
         except URLError as e:
             print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
             return False
-        except Exception as e:
-            print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
-            return False
+        #except Exception as e:
+        #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
+        #    return False
         if allowed:
             print("CHECKED")
             return True
