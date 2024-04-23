@@ -32,8 +32,13 @@ def extract_next_links(url, resp):
     global cache
     global depth
     depth = 0
-    print("resp.url:", resp.url)
-    print("cache", cache)
+    #print("resp.url:", resp.url)
+    #print("cache", cache.keys())
+
+    parsed_url = urlparse(resp.url)
+    path = parsed_url.path
+    if not path.endswith('/'):
+        path += '/' 
     if resp.url in cache:
         return []
     
@@ -49,13 +54,16 @@ def extract_next_links(url, resp):
         for link in extracted_links:
             full_link = urljoin(base_url, link)
             depth += 1
-            if full_link not in cache.keys():
-                normalized_links.append(full_link)
-                cache[full_link] = resp.raw_response.content
+            #check length of content
+            if len(resp.raw_response.content) < 5 * 1024 *1024:                       #CHECKS LENGTH OF FILES       
+                if full_link not in cache.keys():
+                    normalized_links.append(full_link)
+            #think we should add to cache regardless
+            cache[full_link] = resp.raw_response.content
 
         #normalized_links = [urljoin(base_url, link) for link in extracted_links]
         
-                url_counter += 1
+            url_counter += 1       #MAY HAVE MESSED UP PLACMENT OF THIS
             
         print("number of URLS:", url_counter)  
        # print("Normalized_links:", normalized_links, "\n") 
@@ -85,6 +93,21 @@ def is_valid(url):
             robots.read()
             allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
             print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
+
+            #ALLOWED FROM ROBOT
+            if re.match(
+            r".*\.(css|js|bmp|gif|jpe?g|ico"
+            + r"|png|tiff?|mid|mp2|mp3|mp4"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
+            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
+            + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
+            + r"|epub|dll|cnf|tgz|sha1"
+            + r"|thmx|mso|arff|rtf|jar|csv"
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
+                return False
+
+
+
             return allowed
         except URLError as e:
             print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
@@ -93,7 +116,6 @@ def is_valid(url):
         #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
         #    return False
         if allowed:
-            print("CHECKED")
             return True
         else:
             return False  
