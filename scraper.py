@@ -3,10 +3,10 @@ from urllib import robotparser
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from datetime import datetime
-#from reppy.robots import Robots
-
 
 cache = {}
+url_counter = 0
+depth = 0
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -26,25 +26,35 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
-    # if resp.status != 200:
-    #     return None
+    global url_counter
+    global cache
+    global depth
+    depth = 0
+    if resp.url in cache:
+        return []
+    
     if resp.status == 200:
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         a_tags = soup.find_all('a')
         extracted_links = []
         normalized_links = []
         extracted_links = [tag.get('href') for tag in a_tags if tag.get('href')]
+       # print("Extracted URLS:", extracted_links, "\n")
         base_url = resp.url
-        normalized_links = [urljoin(base_url, link) for link in extracted_links]
-        # for tag in a_tags:
-        #     href = tag.get('href')
-        #     if href:
-        #         extracted_links.append(href)
-        #         base_url = resp.url  # The URL that was fetched to get this response
-        #         normalized_links = normalized_links + [urljoin(base_url, link) for link in extracted_links]
-        #         # filter ??
-        #        # final_links = filter_links(normalized_links)  
-        #print(normalized_links)
+    
+        for link in extracted_links:
+            full_link = urljoin(base_url, link)
+            depth += 1
+            if full_link not in cache.keys():
+                normalized_links.append(full_link)
+                cache[full_link] = resp.raw_response.content
+
+        #normalized_links = [urljoin(base_url, link) for link in extracted_links]
+        
+                url_counter += 1
+            
+        print("number of URLS:", url_counter)  
+       # print("Normalized_links:", normalized_links, "\n") 
         return normalized_links
 
 #extract URL
@@ -55,19 +65,23 @@ def is_valid(url):
     # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
+        #print("Depth:", depth, "\n")
         if parsed.scheme not in set(["http", "https"]):
             return False
-        # FIGURE OUT HOW TO NOT GET IT TO BE STUCK
-        robots_url = f"{url}robots.txt" 
-        print(robots_url)
-        robots = robotparser.RobotFileParser()
-        robots.set_url(robots_url)
-        robots.read()
-        allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
-        if allowed:
-            return True
-        else:
-            return False     
+        
+        if depth > 200: # figure out threshold
+            return False
+       # figure out what to do with robots.txt
+        # robots_url = f"{url}robots.txt"
+        # robots = robotparser.RobotFileParser()
+        # robots.set_url(robots_url)
+        # robots.read()
+        # allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
+        # if allowed:
+        #     return True
+        # else:
+        #     return False  
+        
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -99,7 +113,7 @@ def is_valid(url):
         #         if r_parser.can_fetch() == True:
         #             return True
        
-        
+    
 
 
 
