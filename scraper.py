@@ -1,6 +1,12 @@
 import re
-from urllib.parse import urlparse
+import urllib.robotparser
+import urllib
+import requests
+from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
+from datetime import datetime
+
+cache = {}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -16,23 +22,25 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    if resp.status != 200:
-        return list()
-    else:
-        scrappedLinks = list()
-        htmlContent = resp.raw_response.content
-        soup = BeautifulSoup(htmlContent,'html.parser')
-        links = soup.find_all('a')
 
-        for link in links:
-            href = link.get('href')
-            print(link.get('href'))
+    # if resp.status != 200:
+    #     return None
+    if resp.status == 200:
+        soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+        a_tags = soup.find_all('a')
+        extracted_links = []
+        for tag in a_tags:
+            href = tag.get('href')
             if href:
-                scrappedLinks.append(href)
-                
+                extracted_links.append(href)
+                base_url = resp.url  # The URL that was fetched to get this response
+                normalized_links = [urljoin(base_url, link) for link in extracted_links]
+                # filter ??
+               # final_links = filter_links(normalized_links)  
+                #print(normalized_links)
+                return normalized_links
 
 
-        return scrappedLinks
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
@@ -42,6 +50,23 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
+        # figure out what to do with robots.txt
+        robots_url = f"{url}/robots.txt"
+        if robots_url not in cache:
+            response = requests.get(robots_url) # figure out how to do this w/o requests lib
+            if response.status_code == 200:
+                # stores robots.txt contents of domain and the time it was cached in dictionary
+                cache[robots_url] = (response.text, datetime.now())
+            elif response.status_code == 404: # 404 error
+                cache[robots_url] = -1 # robots.txt not found
+        else:
+            if cache[robots_url] != -1:
+                r_parser = urllib.robotparser.RobotFileParser
+                r_parser.set_url = robots_url
+                r_parser.read()
+                if r_parser.can_fetch() == True:
+                    return True
+            
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -51,6 +76,11 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
+       
+       
+        
+
+
 
     except TypeError:
         print ("TypeError for ", parsed)
