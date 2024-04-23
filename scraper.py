@@ -3,6 +3,7 @@ from urllib import robotparser
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from datetime import datetime
+from urllib.error import URLError
 
 cache = {}
 url_counter = 0
@@ -68,19 +69,32 @@ def is_valid(url):
         #print("Depth:", depth, "\n")
         if parsed.scheme not in set(["http", "https"]):
             return False
+
+        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.uci.edu") or parsed.netloc.endswith(".stat.uci.uci.edu")):
+            return False
         
         if depth > 200: # figure out threshold
             return False
        # figure out what to do with robots.txt
-        # robots_url = f"{url}robots.txt"
-        # robots = robotparser.RobotFileParser()
-        # robots.set_url(robots_url)
-        # robots.read()
-        # allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
-        # if allowed:
-        #     return True
-        # else:
-        #     return False  
+        robots_url = urljoin(url,'robots.txt')
+        robots = robotparser.RobotFileParser(robots_url)
+        try:
+            robots.read()
+            allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
+            print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
+            if allowed:
+                return allowed
+        except URLError as e:
+            print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
+            return False
+        except Exception as e:
+            print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
+            return False
+        if allowed:
+            print("CHECKED")
+            return True
+        else:
+            return False  
         
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
