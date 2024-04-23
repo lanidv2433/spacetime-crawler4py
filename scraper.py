@@ -10,7 +10,10 @@ cache = {}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
+    if links:
+        return [link for link in links if is_valid(link)]
+    else:
+        return []
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -29,14 +32,18 @@ def extract_next_links(url, resp):
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         a_tags = soup.find_all('a')
         extracted_links = []
-        for tag in a_tags:
-            href = tag.get('href')
-            if href:
-                extracted_links.append(href)
-                base_url = resp.url  # The URL that was fetched to get this response
-                normalized_links = [urljoin(base_url, link) for link in extracted_links]
-                # filter ??
-               # final_links = filter_links(normalized_links)  
+        normalized_links = []
+        extracted_links = [tag.get('href') for tag in a_tags if tag.get('href')]
+        base_url = resp.url
+        normalized_links = [urljoin(base_url, link) for link in extracted_links]
+        # for tag in a_tags:
+        #     href = tag.get('href')
+        #     if href:
+        #         extracted_links.append(href)
+        #         base_url = resp.url  # The URL that was fetched to get this response
+        #         normalized_links = normalized_links + [urljoin(base_url, link) for link in extracted_links]
+        #         # filter ??
+        #        # final_links = filter_links(normalized_links)  
         #print(normalized_links)
         return normalized_links
 
