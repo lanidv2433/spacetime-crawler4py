@@ -43,10 +43,13 @@ def scraper(url, resp):
         print(f"PAGE LENGTH: {pageLength}")
 
         for c in cleaned.split():
-            if c in word_counter and c not in english_stopwords:
-                word_counter[c] += 1
-            else:
-                word_counter[c] = 1
+            if c not in english_stopwords:
+                if c in word_counter:
+                    word_counter[c] += 1
+                else:
+                    word_counter[c] = 1
+        word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
+        #print(f"WORD COUNTER: {(list(scraper.word_counter))[:50]}")
 
         # parsed = urlparse(url)
         # unique_urls.add(parsed.netloc)
@@ -62,7 +65,7 @@ def scraper(url, resp):
                 if is_valid(link):
                     all_links.append(link)
             url_counter += len(all_links)
-            print("number of URLS:", url_counter)
+            #print("number of URLS:", url_counter)
             
 
             return [link for link in links if is_valid(link)]
@@ -183,11 +186,11 @@ def robot_check(url):
     try:
         robots.read()
         allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
-        print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
+        #print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
 
         return allowed
     except URLError as e:
-        print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
+        #print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
         return False
     #except Exception as e:
     #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors

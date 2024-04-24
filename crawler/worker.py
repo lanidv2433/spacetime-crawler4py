@@ -20,10 +20,10 @@ class Worker(Thread):
     def run(self):
         retry_count = 0
         count = 0
-        while True:
+        while count < 5:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
-                self.logger.info((list(word_counter))[:50])
+                self.logger.info((list(scraper.word_counter))[:50])
                 self.logger.info("Frontier is empty. Stopping Crawler.")
                 break
             try:
@@ -48,4 +48,6 @@ class Worker(Thread):
                 else:
                     time.sleep(self.config.time_delay * retry_count)
             count += 1
+        
+        self.logger.info((list(scraper.word_counter))[:50])
         
