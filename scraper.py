@@ -11,6 +11,8 @@ depth = 0
 
 def scraper(url, resp):
     global url_counter
+    global cache
+    print("\n\nCACHE", cache.keys())
     #print()
     #print("in scraper||||||||||||||||||||||||||||||||||||")
     url_counter -= 1
@@ -65,6 +67,7 @@ def extract_next_links(url, resp):
     
         for link in extracted_links:
             full_link = urljoin(base_url, link)
+            print("\n\nFULL LINK",full_link)
             depth += 1      
             if full_link not in cache.keys():
                 normalized_links.append(full_link)
@@ -88,7 +91,7 @@ def is_valid(url):
         if parsed.scheme not in set(["http", "https"]):
             return False
 
-        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.uci.edu") or parsed.netloc.endswith(".stat.uci.uci.edu")):
+        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
             return False
         
         if depth > 200: # figure out threshold
@@ -153,7 +156,7 @@ def robot_check(url):
 
 def length_check(resp):
     #checks if content is None
-    if resp.raw_response is not None:
+    if resp.raw_response.content is not None:
         #check length of content
         if (len(resp.raw_response.content) < 5 * 1024 *1024) and len(resp.raw_response.content) > 0:                       #CHECKS LENGTH OF FILES 
             return True
@@ -161,3 +164,13 @@ def length_check(resp):
             return False
     else:
         return False
+
+def normalize(url):
+    parsed_url = urlparse(resp.url)
+    path = parsed_url.path.rstrip('/')
+    scheme = 'https' if parsed_url.scheme == "http" else parsed_url.scheme
+    netloc = parsed_url.path.replace("www.", '')
+
+    normalized_url = urlunparse((scheme, netloc, path, None, None, None))
+
+    return normalized_url
