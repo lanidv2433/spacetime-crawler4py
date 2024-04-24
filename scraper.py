@@ -10,10 +10,20 @@ url_counter = 0
 depth = 0
 
 def scraper(url, resp):
-    print("in scraper||||||||||||||||||||||||||||||||||||")
-    if robot_check(url):
+    global url_counter
+    #print()
+    #print("in scraper||||||||||||||||||||||||||||||||||||")
+    url_counter -= 1
+    if robot_check(url) and length_check(resp):
         links = extract_next_links(url, resp)
         if links:
+            #print("\n", [link for link in links if is_valid(link)])
+            all_links = []
+            for link in links:
+                if is_valid(link):
+                    all_links.append(link)
+            url_counter += len(all_links)
+            print("number of URLS:", url_counter)
             return [link for link in links if is_valid(link)]
         else:
             return []
@@ -31,7 +41,6 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
-    global url_counter
     global cache
     global depth
     depth = 0
@@ -56,19 +65,14 @@ def extract_next_links(url, resp):
     
         for link in extracted_links:
             full_link = urljoin(base_url, link)
-            depth += 1
-            #check length of content
-            if len(resp.raw_response.content) < 5 * 1024 *1024:                       #CHECKS LENGTH OF FILES       
-                if full_link not in cache.keys():
-                    normalized_links.append(full_link)
+            depth += 1      
+            if full_link not in cache.keys():
+                normalized_links.append(full_link)
             #think we should add to cache regardless
             cache[full_link] = resp.raw_response.content
 
         #normalized_links = [urljoin(base_url, link) for link in extracted_links]
         
-            url_counter += 1       #MAY HAVE MESSED UP PLACMENT OF THIS
-            
-        print("number of URLS:", url_counter)  
        # print("Normalized_links:", normalized_links, "\n") 
         return normalized_links
 
@@ -146,4 +150,14 @@ def robot_check(url):
     #except Exception as e:
     #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
     #    return False
- 
+
+def length_check(resp):
+    #checks if content is None
+    if resp.raw_response is not None:
+        #check length of content
+        if (len(resp.raw_response.content) < 5 * 1024 *1024) and len(resp.raw_response.content) > 0:                       #CHECKS LENGTH OF FILES 
+            return True
+        else:
+            return False
+    else:
+        return False
