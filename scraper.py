@@ -27,15 +27,22 @@ english_stopwords = [
     "whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're",
     "you've","your","yours","yourself","yourselves"
 ]
+uniqueURLs = set()
+
 
 def scraper(url, resp):
     global url_counter
     global word_counter
+    global uniqueURLs
 
     #print()
     #print("in scraper||||||||||||||||||||||||||||||||||||")
     url_counter -= 1
     if robot_check(url) and length_check(resp):
+        urlMinusFrag = url+""
+        urlMinusFrag = urlMinusFrag.split('#')[0] #essentially eliminates the fragment
+        uniqueURLs.add(urlMinusFrag)
+
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         pageText = soup.get_text()
         cleaned = re.sub(r'\s+', ' ', pageText).strip()
@@ -43,10 +50,11 @@ def scraper(url, resp):
         print(f"PAGE LENGTH: {pageLength}")
 
         for c in cleaned.split():
-            if c in word_counter and c not in english_stopwords:
-                word_counter[c] += 1
-            else:
-                word_counter[c] = 1
+            if c not in english_stopwords:
+                if c in word_counter:
+                    word_counter[c] += 1
+                else:
+                    word_counter[c] = 1
 
         # parsed = urlparse(url)
         # unique_urls.add(parsed.netloc)
