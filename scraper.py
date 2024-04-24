@@ -8,9 +8,16 @@ from urllib.error import URLError
 cache = {}
 url_counter = 0
 depth = 0
+word_counter = {}
+english_stopwords = ["a","about","above","after","again","against","all","am",
+    "an","and","any","are","aren't","as","at","be","because"
+            
+            ]
 
 def scraper(url, resp):
     global url_counter
+    global word_counter
+
     #print()
     #print("in scraper||||||||||||||||||||||||||||||||||||")
     url_counter -= 1
@@ -20,6 +27,12 @@ def scraper(url, resp):
         cleaned = re.sub(r'\s+', ' ', pageText).strip()
         pageLength = len(cleaned.split())
         print(f"PAGE LENGTH: {pageLength}")
+
+        for c in cleaned.split():
+            if c in word_counter:
+                word_counter[c] += 1
+            else:
+                word_counter[c] = 1
 
         # parsed = urlparse(url)
         # unique_urls.add(parsed.netloc)
@@ -36,6 +49,8 @@ def scraper(url, resp):
                     all_links.append(link)
             url_counter += len(all_links)
             print("number of URLS:", url_counter)
+            
+
             return [link for link in links if is_valid(link)]
         else:
             return []
