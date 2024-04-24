@@ -11,9 +11,12 @@ depth = 0
 
 def scraper(url, resp):
     print("in scraper||||||||||||||||||||||||||||||||||||")
-    links = extract_next_links(url, resp)
-    if links:
-        return [link for link in links if is_valid(link)]
+    if robot_check(url):
+        links = extract_next_links(url, resp)
+        if links:
+            return [link for link in links if is_valid(link)]
+        else:
+            return []
     else:
         return []
 
@@ -86,39 +89,6 @@ def is_valid(url):
         
         if depth > 200: # figure out threshold
             return False
-       # figure out what to do with robots.txt
-        robots_url = urljoin(url,'robots.txt')
-        robots = robotparser.RobotFileParser(robots_url)
-        try:
-            robots.read()
-            allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
-            print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
-
-            #ALLOWED FROM ROBOT
-            if re.match(
-            r".*\.(css|js|bmp|gif|jpe?g|ico"
-            + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
-            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
-            + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
-            + r"|epub|dll|cnf|tgz|sha1"
-            + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
-                return False
-
-
-
-            return allowed
-        except URLError as e:
-            print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
-            return False
-        #except Exception as e:
-        #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
-        #    return False
-        if allowed:
-            return True
-        else:
-            return False  
         
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -158,3 +128,22 @@ def is_valid(url):
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
+
+def robot_check(url):
+ # figure out what to do with robots.txt
+    robots_url = urljoin(url,'robots.txt')
+    robots = robotparser.RobotFileParser(robots_url)
+    try:
+        robots.read()
+        allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
+        print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
+
+        return allowed
+    except URLError as e:
+        print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
+        return False
+    #except Exception as e:
+    #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
+    #    return False
+ 
