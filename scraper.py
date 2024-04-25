@@ -56,10 +56,10 @@ def scraper(url, resp):
 
         for c in cleaned.split():
             if not (c.lower() in english_stopwords) and (c.isalpha()):
-                if c in word_counter:
-                    word_counter[c] += 1
+                if c.lower() in word_counter:
+                    word_counter[c.lower()] += 1
                 else:
-                    word_counter[c] = 1
+                    word_counter[c.lower()] = 1
         
         parsed = urlparse(url)
         if parsed.netloc.endswith(".ics.uci.edu"):
@@ -148,7 +148,7 @@ def is_valid(url):
         if parsed.scheme not in set(["http", "https"]):
             return False
 
-        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.uci.edu") or parsed.netloc.endswith(".stat.uci.uci.edu")):
+        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
             return False
         
         if depth > 200: # figure out threshold
