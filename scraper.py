@@ -1,6 +1,6 @@
 import re
 from urllib import robotparser
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, urlunparse
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.error import URLError
@@ -40,12 +40,13 @@ def scraper(url, resp):
     global uniqueURLs
 
     #print()
-    #print("in scraper||||||||||||||||||||||||||||||||||||")
+    print("in scraper||||||||||||||||||||||||||||||||||||")
     url_counter -= 1
     if robot_check(url) and length_check(resp):
-        urlMinusFrag = url+""
-        urlMinusFrag = urlMinusFrag.split('#')[0] #essentially eliminates the fragment
-        uniqueURLs.add(urlMinusFrag)
+
+        if normalizer(url) not in uniqueURLs:
+            uniqueURLs.add(normalizer(url))
+        print("uniqueurl:", len(uniqueURLs))
 
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         pageText = soup.get_text()
@@ -76,6 +77,7 @@ def scraper(url, resp):
 
         links = extract_next_links(url, resp)
         if links:
+            print("links")
             #print("\n", [link for link in links if is_valid(link)])
             all_links = []
             for link in links:
@@ -100,19 +102,16 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-
     global cache
     global depth
     depth = 0
     #print("resp.url:", resp.url)
     #print("cache", cache.keys())
 
-    parsed_url = urlparse(resp.url)
-    path = parsed_url.path
-    if not path.endswith('/'):
-        path += '/' 
-    if resp.url in cache:
-        return []
+    #parsed_url = urlparse(resp.url)
+    norm_url = normalizer(resp.url)
+    #if norm_url in cache:
+    #    return []
     
     if resp.status == 200:
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
@@ -121,15 +120,24 @@ def extract_next_links(url, resp):
         normalized_links = []
         extracted_links = [tag.get('href') for tag in a_tags if tag.get('href')]
        # print("Extracted URLS:", extracted_links, "\n")
-        base_url = resp.url
+
+       #BIG CHANGE
+        #base_url = resp.url
+        base_url = norm_url
     
         for link in extracted_links:
             full_link = urljoin(base_url, link)
+
+            #THSI STUPID THING NOT WORKING!!!!!
+
+            n_full_link = normalizer(full_link)
+
+            #print("\n\nFULL LINK",full_link)
             depth += 1      
-            if full_link not in cache.keys():
-                normalized_links.append(full_link)
+            if n_full_link not in cache.keys():
+                normalized_links.append(n_full_link)
             #think we should add to cache regardless
-            cache[full_link] = resp.raw_response.content
+            cache[n_full_link] = resp.raw_response.content
 
         #normalized_links = [urljoin(base_url, link) for link in extracted_links]
         
@@ -148,7 +156,7 @@ def is_valid(url):
         if parsed.scheme not in set(["http", "https"]):
             return False
 
-        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.uci.edu") or parsed.netloc.endswith(".stat.uci.uci.edu")):
+        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
             return False
         
         if depth > 200: # figure out threshold
@@ -221,3 +229,15 @@ def length_check(resp):
             return False
     else:
         return False
+
+def normalizer(url):
+    parsed_url = urlparse(url)
+    path = parsed_url.path.rstrip('/')
+    scheme = 'https' if parsed_url.scheme == "http" else parsed_url.scheme
+    netloc = parsed_url.netloc.replace("www.", '')
+    query = parsed_url.query
+    param = parsed_url.params
+
+    normalized_url = urlunparse((scheme, netloc, path, param, None, query))
+
+    return normalized_url

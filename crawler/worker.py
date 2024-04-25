@@ -24,7 +24,7 @@ class Worker(Thread):
     def run(self):
         retry_count = 0
         count = 0
-        while count < 10:
+        while True:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
@@ -42,7 +42,8 @@ class Worker(Thread):
                     self.frontier.add_url(scraped_url)
                 self.frontier.mark_url_complete(tbd_url)
                 time.sleep(self.config.time_delay)
-            except:
+            except Exception as e:
+                print("ERROR:", e)
                 retry_count += 1
                 self.frontier.add_url(tbd_url)
                 if retry_count > 3:
