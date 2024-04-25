@@ -6,6 +6,10 @@ from utils import get_logger
 import scraper
 import time
 
+ics_domains = dict()
+longestPage = ["", 0]
+
+word_counter = dict()
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
@@ -20,7 +24,7 @@ class Worker(Thread):
     def run(self):
         retry_count = 0
         count = 0
-        while True:
+        while count < 300:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
@@ -32,13 +36,14 @@ class Worker(Thread):
                     f"Downloaded {tbd_url}, status <{resp.status}>, "
                     f"using cache {self.config.cache_server}.")
                 
-                self.logger.info(f"FRONTIER {self.frontier.to_be_downloaded}")
+                self.logger.info(f"FRONTIER{self.frontier.to_be_downloaded}")
                 scraped_urls = scraper.scraper(tbd_url, resp)
                 for scraped_url in scraped_urls:
                     self.frontier.add_url(scraped_url)
                 self.frontier.mark_url_complete(tbd_url)
                 time.sleep(self.config.time_delay)
-            except:
+            except Exception as e:
+                print("ERROR:", e)
                 retry_count += 1
                 self.frontier.add_url(tbd_url)
                 if retry_count > 3:
@@ -48,3 +53,8 @@ class Worker(Thread):
                     time.sleep(self.config.time_delay * retry_count)
             count += 1
         
+        print(count)
+        print(ics_domains)
+        print(longestPage)
+        sortedWords = sorted(word_counter.items(), key=lambda item: -item[1])
+        print(sortedWords[:50])
