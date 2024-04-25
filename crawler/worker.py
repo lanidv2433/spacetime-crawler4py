@@ -22,7 +22,7 @@ class Worker(Thread):
     def run(self):
         retry_count = 0
         count = 0
-        while count < 5:
+        while count < 15:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
@@ -50,6 +50,7 @@ class Worker(Thread):
                     time.sleep(self.config.time_delay * retry_count)
             count += 1
         
+        print(count)
         print(ics_domains)
         print(longestPage)
 
