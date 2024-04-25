@@ -9,6 +9,8 @@ import time
 ics_domains = dict()
 longestPage = ["", 0]
 
+word_counter = dict()
+
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
         self.logger = get_logger(f"Worker-{worker_id}", "Worker")
@@ -53,3 +55,5 @@ class Worker(Thread):
         print(count)
         print(ics_domains)
         print(longestPage)
+        sortedWords = sorted(word_counter.items(), key=lambda item: -item[1])
+        print(sortedWords[:50])
