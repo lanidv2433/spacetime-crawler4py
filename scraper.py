@@ -64,10 +64,10 @@ def scraper(url, resp):
         parsed = urlparse(url)
         if parsed.netloc.endswith(".ics.uci.edu"):
             print("ics domain")
-            if url in ics_domains.keys():
-                ics_domains[url] += 1
+            if parsed.netloc in ics_domains.keys():
+                ics_domains[parsed.netloc] += 1
             else:
-                ics_domains[url] = 1
+                ics_domains[parsed.netloc] = 1
                 
         # unique_urls.add(parsed.netloc)
         if longestPage[1] < pageLength:
