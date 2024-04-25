@@ -4,7 +4,7 @@ from urllib.parse import urlparse, urljoin, urlunparse
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.error import URLError
-
+from simhash import Simhash
 
 from crawler import worker
 from crawler.worker import word_counter
@@ -35,6 +35,33 @@ english_stopwords = [
 uniqueURLs = set()
 
 
+
+def tokenize(content):
+    #print("THIS IS CONTENT |||||||||:", content, "\n")
+    soup = BeautifulSoup(content, 'html.parser')
+    #text = re.sub(r'[^>]+>', '', content)
+    text = soup.get_text()
+    text = text.strip().lower()
+    for tok in text:
+        if tok == '':
+            text.remove(tok)
+            
+    tokens = []
+    token = ""
+
+    for char in text:
+        if char.isalnum() and char.isascii():
+            token += char
+        else:
+            t = token.lower()
+            if t != '':
+                tokens.append(t)
+                token = ""
+    if token:
+        tokens.append(token.lower())
+    print("THIS IS TOKENS: |||||||||||||||||||||||", tokens)
+    return tokens
+
 def scraper(url, resp):
     global url_counter
     global uniqueURLs
@@ -50,6 +77,13 @@ def scraper(url, resp):
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         pageText = soup.get_text()
         cleaned = re.sub(r'\s+', ' ', pageText).strip()
+        token = tokenize(cleaned)
+        page_simhash = Simhash(token)
+        for url, simhash in cache.items():
+            if page_simhash.distance(simhash) < 5:
+                return []
+        cache[url] = page_simhash
+        #print("THIS IS CLEAN ||||||||||||||||", token, "\n")
         pageLength = len(cleaned.split())
         print(f"PAGE LENGTH: {pageLength}")
 
@@ -91,6 +125,9 @@ def scraper(url, resp):
             return []
     else:
         return []
+    
+
+
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -128,6 +165,13 @@ def extract_next_links(url, resp):
         for link in extracted_links:
             full_link = urljoin(base_url, link)
 
+            depth += 1   # CHECK DOMAIN OF SUBDOMAIN   
+            if full_link not in cache.keys():
+                normalized_links.append(full_link)
+            #think we should add to cache regardless
+            #cache[full_link] = resp.raw_response.content
+
+
             #THSI STUPID THING NOT WORKING!!!!!
 
             n_full_link = normalizer(full_link)
@@ -138,6 +182,7 @@ def extract_next_links(url, resp):
                 normalized_links.append(n_full_link)
             #think we should add to cache regardless
             cache[n_full_link] = resp.raw_response.content
+
 
         #normalized_links = [urljoin(base_url, link) for link in extracted_links]
         
