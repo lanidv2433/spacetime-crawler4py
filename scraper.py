@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.error import URLError
 
+from crawler import worker
+
 cache = {}
 url_counter = 0
 depth = 0
@@ -17,6 +19,22 @@ def scraper(url, resp):
     #print("in scraper||||||||||||||||||||||||||||||||||||")
     url_counter -= 1
     if robot_check(url) and length_check(resp):
+        soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+        pageText = soup.get_text()
+        cleaned = re.sub(r'\s+', ' ', pageText).strip()
+        pageLength = len(cleaned.split())
+        print(f"PAGE LENGTH: {pageLength}")
+
+        parsed = urlparse(url)
+        if parsed.netloc.endswith(".ics.uci.edu"):
+            print("ics domain")
+            worker.updateDomains(url)
+
+        # unique_urls.add(parsed.netloc)
+        if worker.longest_page < pageLength:
+           print("update longest")
+           worker.updateLongestPage(url, pageLength)
+
         links = extract_next_links(url, resp)
         if links:
             #print("\n", [link for link in links if is_valid(link)])
