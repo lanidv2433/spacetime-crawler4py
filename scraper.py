@@ -40,7 +40,6 @@ def scraper(url, resp):
     global uniqueURLs
 
     #print()
-    print("in scraper||||||||||||||||||||||||||||||||||||")
     url_counter -= 1
     if robot_check(url) and length_check(resp):
 
@@ -57,10 +56,10 @@ def scraper(url, resp):
 
         for c in cleaned.split():
             if not (c.lower() in english_stopwords) and (c.isalpha()):
-                if c in word_counter:
-                    word_counter[c] += 1
+                if c.lower() in word_counter:
+                    word_counter[c.lower()] += 1
                 else:
-                    word_counter[c] = 1
+                    word_counter[c.lower()] = 1
         
         parsed = urlparse(url)
         if parsed.netloc.endswith(".ics.uci.edu"):
@@ -77,12 +76,13 @@ def scraper(url, resp):
 
         links = extract_next_links(url, resp)
         if links:
-            print("links")
+            #print("links")
             #print("\n", [link for link in links if is_valid(link)])
             all_links = []
             for link in links:
                 if is_valid(link):
                     all_links.append(link)
+            #print("extracted:", all_links)
             url_counter += len(all_links)
             #print("number of URLS:", url_counter)
             return [link for link in links if is_valid(link)]
@@ -155,8 +155,9 @@ def is_valid(url):
         #print("Depth:", depth, "\n")
         if parsed.scheme not in set(["http", "https"]):
             return False
-
+        #print(url)
         if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
+            #print(f"rejected: |{parsed.netloc}|")
             return False
         
         if depth > 200: # figure out threshold
@@ -231,13 +232,6 @@ def length_check(resp):
         return False
 
 def normalizer(url):
-    parsed_url = urlparse(url)
-    path = parsed_url.path.rstrip('/')
-    scheme = 'https' if parsed_url.scheme == "http" else parsed_url.scheme
-    netloc = parsed_url.netloc.replace("www.", '')
-    query = parsed_url.query
-    param = parsed_url.params
 
-    normalized_url = urlunparse((scheme, netloc, path, param, None, query))
-
-    return normalized_url
+    url = url.split('#')[0]
+    return url
