@@ -5,27 +5,74 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.error import URLError
 
+
+from crawler import worker
+from crawler.worker import word_counter
+from crawler.worker import longestPage
+from crawler.worker import ics_domains
+
 cache = {}
 url_counter = 0
 depth = 0
+english_stopwords = [
+    "a","about","above","after","again","against","all","am",
+    "an","and","any","are","aren't","as","at","be","because","been","before","being",
+    "below","between","both","but","by","can't","cannot","could","couldn't","did",
+    "didn't","do","does","doesn't","doing","don't","down","during","each","few","for",
+    "from","further","had","hadn't","has","hasn't","have","haven't","having","he","he'd",
+    "he'll","he's","her","here","here's","hers","herself","him","himself","his","how",
+    "how's","i","i'd","i'll","i'm","i've","if","in","into","is","isn't","it","it's","its",
+    "itself","let's","me","more","most","mustn't","my","myself","no","nor","not","of","off",
+    "on","once","only","or","other","ought","our","ours","ourselves","out","over","own",
+    "same","shan't","she","she'd","she'll","she's","should","shouldn't","so","some","such",
+    "than","that","that's","the","their","theirs","them","themselves","then","there","there's",
+    "these","they","they'd","they'll","they're","they've","this","those","through","to","too",
+    "under","until","up","very","was","wasn't","we","we'd","we'll","we're","we've","were",
+    "weren't","what","what's","when","when's","where","where's","which","while","who","who's",
+    "whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're",
+    "you've","your","yours","yourself","yourselves"
+]
+uniqueURLs = set()
+
 
 def scraper(url, resp):
     global url_counter
+    global uniqueURLs
+
     #print()
     #print("in scraper||||||||||||||||||||||||||||||||||||")
     url_counter -= 1
     if robot_check(url) and length_check(resp):
+        urlMinusFrag = url+""
+        urlMinusFrag = urlMinusFrag.split('#')[0] #essentially eliminates the fragment
+        uniqueURLs.add(urlMinusFrag)
+
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         pageText = soup.get_text()
         cleaned = re.sub(r'\s+', ' ', pageText).strip()
         pageLength = len(cleaned.split())
         print(f"PAGE LENGTH: {pageLength}")
 
-        # parsed = urlparse(url)
+
+        for c in cleaned.split():
+            if not (c.lower() in english_stopwords) and (c.isalpha()):
+                if c in word_counter:
+                    word_counter[c] += 1
+                else:
+                    word_counter[c] = 1
+        
+        parsed = urlparse(url)
+        if parsed.netloc.endswith(".ics.uci.edu"):
+            print("ics domain")
+            if parsed.netloc in ics_domains.keys():
+                ics_domains[parsed.netloc] += 1
+            else:
+                ics_domains[parsed.netloc] = 1
+                
         # unique_urls.add(parsed.netloc)
-        # if longest_page < pageLength:
-        #     longest_page = pageLength
-        #     print(longest_page)
+        if longestPage[1] < pageLength:
+            longestPage[0] = url
+            longestPage[1] = pageLength
 
         links = extract_next_links(url, resp)
         if links:
@@ -35,9 +82,10 @@ def scraper(url, resp):
                 if is_valid(link):
                     all_links.append(link)
             url_counter += len(all_links)
-            print("number of URLS:", url_counter)
+            #print("number of URLS:", url_counter)
             return [link for link in links if is_valid(link)]
         else:
+            #word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
             return []
     else:
         return []
@@ -153,11 +201,11 @@ def robot_check(url):
     try:
         robots.read()
         allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
-        print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
+        #print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
 
         return allowed
     except URLError as e:
-        print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
+        #print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
         return False
     #except Exception as e:
     #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
