@@ -6,8 +6,8 @@ from utils import get_logger
 import scraper
 import time
 
-ics_domains = {}
-longestPage = ()
+ics_domains = dict()
+longestPage = ["", 0]
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
@@ -22,7 +22,7 @@ class Worker(Thread):
     def run(self):
         retry_count = 0
         count = 0
-        while count < 15:
+        while count < 10:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
@@ -53,15 +53,3 @@ class Worker(Thread):
         print(count)
         print(ics_domains)
         print(longestPage)
-
-    def updateDomains(domain):
-        global ics_domains
-        if domain not in ics_domains.keys():
-            ics_domains[domain] = 1
-        else:
-            ics_domains[domain] += 1
-
-    def updateLongestPage(page, length):
-        global longestPage
-        longestPage[0] = page
-        longestPage[1] = length

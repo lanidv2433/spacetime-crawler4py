@@ -6,6 +6,8 @@ from datetime import datetime
 from urllib.error import URLError
 
 from crawler import worker
+from crawler.worker import longestPage
+from crawler.worker import ics_domains
 
 cache = {}
 url_counter = 0
@@ -26,12 +28,15 @@ def scraper(url, resp):
         parsed = urlparse(url)
         if parsed.netloc.endswith(".ics.uci.edu"):
             print("ics domain")
-            worker.updateDomains(url)
+            if url in ics_domains.keys():
+                ics_domains[url] += 1
+            else:
+                ics_domains[url] = 1
 
         # unique_urls.add(parsed.netloc)
-        if worker.longest_page < pageLength:
-           print("update longest")
-           worker.updateLongestPage(url, pageLength)
+        if longestPage[1] < pageLength:
+            longestPage[0] = url
+            longestPage[1] = pageLength
 
         links = extract_next_links(url, resp)
         if links:
