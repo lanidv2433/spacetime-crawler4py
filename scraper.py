@@ -221,7 +221,7 @@ def robot_check(url):
 
 def length_check(resp):
     #checks if content is None
-    if resp.raw_response.content is not None:
+    if resp.raw_response is not None:
         #check length of content
         if (len(resp.raw_response.content) < 5 * 1024 *1024) and len(resp.raw_response.content) > 0:                       #CHECKS LENGTH OF FILES 
             return True
