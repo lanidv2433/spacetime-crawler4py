@@ -22,7 +22,8 @@ class Worker(Thread):
     def run(self):
         retry_count = 0
         count = 0
-        while count < 15:
+        print("IN RUN worker")
+        while count < 10:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")

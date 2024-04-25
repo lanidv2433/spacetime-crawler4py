@@ -16,7 +16,7 @@ def scraper(url, resp):
     global cache
     print("\n\nCACHE", cache.keys())
     #print()
-    #print("in scraper||||||||||||||||||||||||||||||||||||")
+    print("in scraper||||||||||||||||||||||||||||||||||||")
     url_counter -= 1
     if robot_check(url) and length_check(resp):
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
@@ -37,6 +37,7 @@ def scraper(url, resp):
 
         links = extract_next_links(url, resp)
         if links:
+            print("links")
             #print("\n", [link for link in links if is_valid(link)])
             all_links = []
             for link in links:
