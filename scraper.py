@@ -1,6 +1,6 @@
 import re
 from urllib import robotparser
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, urlunparse
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.error import URLError
@@ -25,15 +25,19 @@ def scraper(url, resp):
         pageLength = len(cleaned.split())
         print(f"PAGE LENGTH: {pageLength}")
 
+
         parsed = urlparse(url)
         if parsed.netloc.endswith(".ics.uci.edu"):
             print("ics domain")
             worker.updateDomains(url)
 
+
         # unique_urls.add(parsed.netloc)
-        if worker.longest_page < pageLength:
-           print("update longest")
-           worker.updateLongestPage(url, pageLength)
+        #if worker.longest_page < pageLength:
+        #   print("update longest")
+        #   worker.updateLongestPage(url, pageLength)
+
+
 
         links = extract_next_links(url, resp)
         if links:
@@ -61,18 +65,15 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-
     global cache
     global depth
     depth = 0
     #print("resp.url:", resp.url)
     #print("cache", cache.keys())
 
-    parsed_url = urlparse(resp.url)
-    path = parsed_url.path
-    if not path.endswith('/'):
-        path += '/' 
-    if resp.url in cache:
+    #parsed_url = urlparse(resp.url)
+    norm_url = normalizer(resp.url)
+    if norm_url in cache:
         return []
     
     if resp.status == 200:
@@ -82,10 +83,19 @@ def extract_next_links(url, resp):
         normalized_links = []
         extracted_links = [tag.get('href') for tag in a_tags if tag.get('href')]
        # print("Extracted URLS:", extracted_links, "\n")
-        base_url = resp.url
+
+       #BIG CHANGE
+        #base_url = resp.url
+        base_url = norm_url
     
         for link in extracted_links:
             full_link = urljoin(base_url, link)
+
+            #THSI STUPID THING NOT WORKING!!!!!
+
+            n_full_link = normalizer(full_link)
+
+
             print("\n\nFULL LINK",full_link)
             depth += 1      
             if full_link not in cache.keys():
@@ -184,11 +194,11 @@ def length_check(resp):
     else:
         return False
 
-def normalize(url):
-    parsed_url = urlparse(resp.url)
+def normalizer(url):
+    parsed_url = urlparse(url)
     path = parsed_url.path.rstrip('/')
     scheme = 'https' if parsed_url.scheme == "http" else parsed_url.scheme
-    netloc = parsed_url.path.replace("www.", '')
+    netloc = parsed_url.netloc.replace("www.", '')
 
     normalized_url = urlunparse((scheme, netloc, path, None, None, None))
 

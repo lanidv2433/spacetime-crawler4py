@@ -41,7 +41,8 @@ class Worker(Thread):
                     self.frontier.add_url(scraped_url)
                 self.frontier.mark_url_complete(tbd_url)
                 time.sleep(self.config.time_delay)
-            except:
+            except Exception as e:
+                print("ERROR:", e)
                 retry_count += 1
                 self.frontier.add_url(tbd_url)
                 if retry_count > 3:
