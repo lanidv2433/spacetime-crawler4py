@@ -5,10 +5,11 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.error import URLError
 
+from crawler.worker import word_counter
+
 cache = {}
 url_counter = 0
 depth = 0
-word_counter = {}
 english_stopwords = [
     "a","about","above","after","again","against","all","am",
     "an","and","any","are","aren't","as","at","be","because","been","before","being",
@@ -32,7 +33,7 @@ uniqueURLs = set()
 
 def scraper(url, resp):
     global url_counter
-    global word_counter
+    #global word_counter
     global uniqueURLs
 
     #print()
@@ -50,12 +51,12 @@ def scraper(url, resp):
         print(f"PAGE LENGTH: {pageLength}")
 
         for c in cleaned.split():
-            if c not in english_stopwords:
+            if not (c.lower() in english_stopwords) and (c.isalpha()):
                 if c in word_counter:
                     word_counter[c] += 1
                 else:
                     word_counter[c] = 1
-        word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
+        #word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
         #print(f"WORD COUNTER: {(list(scraper.word_counter))[:50]}")
 
         # parsed = urlparse(url)
@@ -73,11 +74,9 @@ def scraper(url, resp):
                     all_links.append(link)
             url_counter += len(all_links)
             #print("number of URLS:", url_counter)
-            
-
             return [link for link in links if is_valid(link)]
         else:
-            word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
+            #word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
             return []
     else:
         return []

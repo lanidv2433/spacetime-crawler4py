@@ -7,6 +7,8 @@ import scraper
 import time
 
 
+word_counter = dict()
+
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
         self.logger = get_logger(f"Worker-{worker_id}", "Worker")
@@ -20,10 +22,9 @@ class Worker(Thread):
     def run(self):
         retry_count = 0
         count = 0
-        while count < 5:
+        while count < 15:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
-                self.logger.info((list(scraper.word_counter))[:50])
                 self.logger.info("Frontier is empty. Stopping Crawler.")
                 break
             try:
@@ -49,5 +50,7 @@ class Worker(Thread):
                     time.sleep(self.config.time_delay * retry_count)
             count += 1
         
-        self.logger.info((list(scraper.word_counter))[:50])
+        sortedWords = sorted(word_counter.items(), key=lambda item: -item[1])
+        print(sortedWords[:50])
+        print(count)
         
