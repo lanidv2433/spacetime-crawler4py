@@ -33,7 +33,6 @@ uniqueURLs = set()
 
 def scraper(url, resp):
     global url_counter
-    #global word_counter
     global uniqueURLs
 
     #print()
@@ -56,9 +55,7 @@ def scraper(url, resp):
                     word_counter[c] += 1
                 else:
                     word_counter[c] = 1
-        #word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
-        #print(f"WORD COUNTER: {(list(scraper.word_counter))[:50]}")
-
+        
         # parsed = urlparse(url)
         # unique_urls.add(parsed.netloc)
         # if longest_page < pageLength:
