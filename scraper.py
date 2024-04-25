@@ -5,7 +5,11 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.error import URLError
 
+
+from crawler import worker
 from crawler.worker import word_counter
+from crawler.worker import longestPage
+from crawler.worker import ics_domains
 
 cache = {}
 url_counter = 0
@@ -49,6 +53,7 @@ def scraper(url, resp):
         pageLength = len(cleaned.split())
         print(f"PAGE LENGTH: {pageLength}")
 
+
         for c in cleaned.split():
             if not (c.lower() in english_stopwords) and (c.isalpha()):
                 if c in word_counter:
@@ -56,11 +61,18 @@ def scraper(url, resp):
                 else:
                     word_counter[c] = 1
         
-        # parsed = urlparse(url)
+        parsed = urlparse(url)
+        if parsed.netloc.endswith(".ics.uci.edu"):
+            print("ics domain")
+            if url in ics_domains.keys():
+                ics_domains[url] += 1
+            else:
+                ics_domains[url] = 1
+                
         # unique_urls.add(parsed.netloc)
-        # if longest_page < pageLength:
-        #     longest_page = pageLength
-        #     print(longest_page)
+        if longestPage[1] < pageLength:
+            longestPage[0] = url
+            longestPage[1] = pageLength
 
         links = extract_next_links(url, resp)
         if links:
