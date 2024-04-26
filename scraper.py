@@ -6,6 +6,8 @@ from datetime import datetime
 from urllib.error import URLError
 from simhash import Simhash
 
+
+
 from crawler import worker
 from crawler.worker import word_counter
 from crawler.worker import longestPage
@@ -66,14 +68,15 @@ def tokenize(content):
 def scraper(url, resp):
     global url_counter
     global uniqueURLs
-
+    print("work1")
     #print()
     url_counter -= 1
+    print(url)
     if robot_check(url) and length_check(resp):
-
+        print("work2")
         if normalizer(url) not in uniqueURLs:
             uniqueURLs.add(normalizer(url))
-        print("uniqueurl:", len(uniqueURLs))
+        print("uniqueurl:", uniqueURLs)
 
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         pageText = soup.get_text()
@@ -104,6 +107,7 @@ def scraper(url, resp):
                     word_counter[c.lower()] = 1
         
         parsed = urlparse(url)
+        print(parsed.netloc)
         if parsed.netloc.endswith(".ics.uci.edu"):
             #print("ics domain")
             if parsed.netloc in ics_domains.keys():
@@ -133,9 +137,6 @@ def scraper(url, resp):
             return []
     else:
         return []
-    
-
-
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -205,9 +206,10 @@ def is_valid(url):
         #print("Depth:", depth, "\n")
         if parsed.scheme not in set(["http", "https"]):
             return False
-        #print(url)
-        if not (parsed.netloc.endswith(".ics.uci.edu")): #or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
-            #print(f"rejected: |{parsed.netloc}|")
+        #print(parsed.netloc)
+        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
+            print(f"rejected: |{parsed.netloc}|")
+            
             return False
         
         if depth > 200: # figure out threshold
@@ -264,7 +266,7 @@ def robot_check(url):
 
         return allowed
     except URLError as e:
-        #print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
+        print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
         return False
     #except Exception as e:
     #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors

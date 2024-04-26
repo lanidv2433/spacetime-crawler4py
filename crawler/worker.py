@@ -10,6 +10,7 @@ ics_domains = dict()
 longestPage = ["", 0]
 
 word_counter = dict()
+uniqueURLs = {}
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
@@ -22,6 +23,7 @@ class Worker(Thread):
         super().__init__(daemon=True)
         
     def run(self):
+        global uniqueURLs
         retry_count = 0
         count = 0
         while count < 10:
@@ -59,7 +61,7 @@ class Worker(Thread):
                     file.write(f"longest page: {longestPage}\n")
                     sortedWords = sorted(word_counter.items(), key=lambda item: -item[1])
                     file.write(f"sorted words: {sortedWords[:50]}\n")
-                    file.write(f"unique_url: {uniqueurl}\n")
+                    file.write(f"unique_url: {len(uniqueURLs)}\n")
                     
 
 
@@ -71,3 +73,4 @@ class Worker(Thread):
         print("longest Page:", longestPage)
         sortedWords = sorted(word_counter.items(), key=lambda item: -item[1])
         print(sortedWords[:50])
+        print(uniqueURLs)
