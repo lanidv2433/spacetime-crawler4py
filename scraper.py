@@ -104,6 +104,10 @@ def scraper(url, resp):
         #print("HHHHHHHHH:", url)
         #print("THIS IS CLEAN ||||||||||||||||", token, "\n")
         pageLength = len(cleaned.split())
+
+        if pageLength < 150:
+            return []
+            
         print(f"PAGE LENGTH: {pageLength}")
 
 
