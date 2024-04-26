@@ -15,7 +15,7 @@ from crawler.worker import ics_domains
 
 cache = {}
 url_counter = 0
-depth = 0
+depth = {}
 english_stopwords = [
     "a","about","above","after","again","against","all","am",
     "an","and","any","are","aren't","as","at","be","because","been","before","being",
@@ -71,12 +71,16 @@ def scraper(url, resp):
     #print("work1")
     #print()
     url_counter -= 1
+    
     #print("HHHHHHHHH:", url)
     if robot_check(url) and length_check(resp):
         #print("work2")
+        #print(f"THIS IS DEPTH OF {domain} |||||||||||||||||| {depth[domain]}\n")
+        
+
         if normalizer(url) not in uniqueURLs:
             uniqueURLs.add(normalizer(url))
-        print("uniqueurl:", uniqueURLs)
+       # print("uniqueurl:", uniqueURLs)
         #print("HHHHHHHHH:", url)
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         pageText = soup.get_text()
@@ -132,12 +136,21 @@ def scraper(url, resp):
             #print("\n", [link for link in links if is_valid(link)])
             all_links = []
             for link in links:
-                if is_valid(link):
-                    all_links.append(link)
+                domain = urlparse(link).netloc
+                if domain in depth:
+                    depth[domain] = depth[domain] + 1
+                else:
+                    depth[domain] = 1
+                if depth[domain] < 40:
+                    #print(f"THIS IS DEPTH OF {domain} |||||||||||||||||| {depth[domain]}\n")
+                    if is_valid(link):
+                        all_links.append(link)
+            #print("THIS IS LINKS |||||||||||||||||||||||", links, "\n")
             #print("extracted:", all_links)
             url_counter += len(all_links)
             #print("number of URLS:", url_counter)
-            return [link for link in links if is_valid(link)]
+            #return [link for link in links if is_valid(link)]
+            return all_links
         else:
             #word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
             return []
@@ -155,8 +168,8 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
     global cache
-    global depth
-    depth = 0
+   # global depth
+   # depth = 0
     #print("resp.url:", resp.url)
     #print("cache", cache.keys())
 
@@ -189,7 +202,7 @@ def extract_next_links(url, resp):
             n_full_link = normalizer(full_link)
 
             #print("\n\nFULL LINK",full_link)
-            depth += 1      
+           # depth += 1      
             if n_full_link not in cache.keys():
                 normalized_links.append(n_full_link)
             #think we should add to cache regardless
@@ -218,8 +231,8 @@ def is_valid(url):
             
             return False
         
-        if depth > 200: # figure out threshold
-            return False
+        # if depth > 200: # figure out threshold
+        #     return False
         
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -231,31 +244,6 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
        
-       #robots = Robots.parse(robots_url)
-        
-        #test = webbrowser.open(robots_url.read())
-        #print(test)
-        
-
-        # if robots_url not in cache:
-        #     response = requests.get(robots_url) # figure out how to do this w/o requests lib
-        #     if response.status_code == 200:
-        #         # stores robots.txt contents of domain and the time it was cached in dictionary
-        #         cache[robots_url] = (response.text, datetime.now())
-        #     elif response.status_code == 404: # 404 error
-        #         cache[robots_url] = -1 # robots.txt not found
-        # else:
-        #     if cache[robots_url] != -1:
-        #         r_parser = urllib.robotparser.RobotFileParser
-        #         r_parser.set_url = robots_url
-        #         r_parser.read()
-        #         if r_parser.can_fetch() == True:
-        #             return True
-       
-    
-
-
-
     except TypeError:
         print ("TypeError for ", parsed)
         raise
