@@ -8,9 +8,8 @@ import time
 
 ics_domains = dict()
 longestPage = ["", 0]
-
 word_counter = dict()
-uniqueURLs = {}
+uniqueURLs = set()
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
@@ -26,7 +25,7 @@ class Worker(Thread):
         global uniqueURLs
         retry_count = 0
         count = 0
-        while count < 50:
+        while count < 10:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
@@ -61,13 +60,9 @@ class Worker(Thread):
                     file.write(f"longest page: {longestPage}\n")
                     sortedWords = sorted(word_counter.items(), key=lambda item: -item[1])
                     file.write(f"sorted words: {sortedWords[:50]}\n")
-                    file.write(f"unique_url: {len(uniqueURLs)}\n")
+                    file.write(f"unique_url size: {len(uniqueURLs)}\n")
+                    file.write(f"unique_urls: {uniqueURLs}\n")
                     
-
-
-
-
-
         print(count)
         print(ics_domains)
         print("longest Page:", longestPage)

@@ -12,6 +12,7 @@ from crawler import worker
 from crawler.worker import word_counter
 from crawler.worker import longestPage
 from crawler.worker import ics_domains
+from crawler.worker import uniqueURLs
 
 cache = {}
 url_counter = 0
@@ -34,8 +35,6 @@ english_stopwords = [
     "whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're",
     "you've","your","yours","yourself","yourselves"
 ]
-uniqueURLs = set()
-
 
 
 def tokenize(content):
@@ -67,18 +66,19 @@ def tokenize(content):
 
 def scraper(url, resp):
     global url_counter
-    global uniqueURLs
-    #print("work1")
-    #print()
     url_counter -= 1
     
+    print(url)
+    print(resp.url)
+    print(resp.raw_response.url)
+    print(resp.status)
+    #print(resp.raw_response.content)
     #print("HHHHHHHHH:", url)
     if robot_check(url) and length_check(resp):
         #print("work2")
         #print(f"THIS IS DEPTH OF {domain} |||||||||||||||||| {depth[domain]}\n")
-        
 
-        if normalizer(url) not in uniqueURLs:
+        if not (normalizer(url) in uniqueURLs):
             uniqueURLs.add(normalizer(url))
        # print("uniqueurl:", uniqueURLs)
         #print("HHHHHHHHH:", url)
