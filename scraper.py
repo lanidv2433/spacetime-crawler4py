@@ -59,7 +59,8 @@ def tokenize(content):
                 token = ""
     if token:
         tokens.append(token.lower())
-    print("THIS IS TOKENS: |||||||||||||||||||||||", tokens)
+    #print("THIS IS TOKENS: |||||||||||||||||||||||", tokens)
+    #print("working here")
     return tokens
 
 def scraper(url, resp):
@@ -79,9 +80,16 @@ def scraper(url, resp):
         cleaned = re.sub(r'\s+', ' ', pageText).strip()
         token = tokenize(cleaned)
         page_simhash = Simhash(token)
+        #print("working here2")
         for url, simhash in cache.items():
+            #fix with duct tape
+            #print("working herezzz")
+            print(type(page_simhash), type(simhash))
+
             if page_simhash.distance(simhash) < 5:
+                print("working herereturn")
                 return []
+        #print(print("working here3"))
         cache[url] = page_simhash
         #print("THIS IS CLEAN ||||||||||||||||", token, "\n")
         pageLength = len(cleaned.split())
@@ -97,7 +105,7 @@ def scraper(url, resp):
         
         parsed = urlparse(url)
         if parsed.netloc.endswith(".ics.uci.edu"):
-            print("ics domain")
+            #print("ics domain")
             if parsed.netloc in ics_domains.keys():
                 ics_domains[parsed.netloc] += 1
             else:
@@ -165,9 +173,6 @@ def extract_next_links(url, resp):
         for link in extracted_links:
             full_link = urljoin(base_url, link)
 
-            depth += 1   # CHECK DOMAIN OF SUBDOMAIN   
-            if full_link not in cache.keys():
-                normalized_links.append(full_link)
             #think we should add to cache regardless
             #cache[full_link] = resp.raw_response.content
 
@@ -181,7 +186,7 @@ def extract_next_links(url, resp):
             if n_full_link not in cache.keys():
                 normalized_links.append(n_full_link)
             #think we should add to cache regardless
-            cache[n_full_link] = resp.raw_response.content
+            #cache[n_full_link] = resp.raw_response.content
 
 
         #normalized_links = [urljoin(base_url, link) for link in extracted_links]
@@ -201,7 +206,7 @@ def is_valid(url):
         if parsed.scheme not in set(["http", "https"]):
             return False
         #print(url)
-        if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
+        if not (parsed.netloc.endswith(".ics.uci.edu")): #or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
             #print(f"rejected: |{parsed.netloc}|")
             return False
         

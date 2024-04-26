@@ -24,7 +24,7 @@ class Worker(Thread):
     def run(self):
         retry_count = 0
         count = 0
-        while count < 300:
+        while count < 10:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
@@ -52,9 +52,22 @@ class Worker(Thread):
                 else:
                     time.sleep(self.config.time_delay * retry_count)
             count += 1
-        
+            if count%200 == 0:
+                with open('outputuu.txt', 'a') as file:
+                    file.write(f"count: {count}\n")
+                    file.write(f"ics_domains: {ics_domains}\n")
+                    file.write(f"longest page: {longestPage}\n")
+                    sortedWords = sorted(word_counter.items(), key=lambda item: -item[1])
+                    file.write(f"sorted words: {sortedWords[:50]}\n")
+                    file.write(f"unique_url: {uniqueurl}\n")
+                    
+
+
+
+
+
         print(count)
         print(ics_domains)
-        print(longestPage)
+        print("longest Page:", longestPage)
         sortedWords = sorted(word_counter.items(), key=lambda item: -item[1])
         print(sortedWords[:50])
