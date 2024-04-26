@@ -202,6 +202,8 @@ def extract_next_links(url, resp):
         return normalized_links
     elif response.status == 301 or response.status == 302:
         # new_redirect_url = resp.raw_response.content.get('Location')
+        print(resp.raw_response)
+        print(resp.raw_response.content)
 
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         location = soup.find('Location')
