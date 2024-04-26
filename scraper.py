@@ -200,14 +200,10 @@ def extract_next_links(url, resp):
         
        # print("Normalized_links:", normalized_links, "\n") 
         return normalized_links
-    elif response.status == 301 or response.status == 302:
+    elif response.status == 301 or response.status == 302 or response.status == 303 or response.status == 307 or response.status == 308:
         try:
-            new_redirect_url = resp.raw_response.content.get('Location')
-            # print(resp.raw_response)
-            # print(resp.raw_response.content)
-
-            # soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
-            # location = soup.find('Location')
+            normalized_links = []
+            new_redirect_url = resp.raw_response.headers.get('Location')
 
             base_url = norm_url
             if new_redirect_url.startswith('http://') or new_redirect_url.startswith('https://'):
@@ -218,9 +214,8 @@ def extract_next_links(url, resp):
             if n_full_link not in cache.keys():
                     normalized_links.append(n_full_link)
         except Exception as e:
-            
-
-        # normalized_links.append(resp.url) // like resp.url is post redirection
+        
+        return normalized_links
 
 
         #not sure about depth
