@@ -68,32 +68,36 @@ def tokenize(content):
 def scraper(url, resp):
     global url_counter
     global uniqueURLs
-    print("work1")
+    #print("work1")
     #print()
     url_counter -= 1
-    print(url)
+    #print("HHHHHHHHH:", url)
     if robot_check(url) and length_check(resp):
-        print("work2")
+        #print("work2")
         if normalizer(url) not in uniqueURLs:
             uniqueURLs.add(normalizer(url))
         print("uniqueurl:", uniqueURLs)
-
+        #print("HHHHHHHHH:", url)
         soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
         pageText = soup.get_text()
         cleaned = re.sub(r'\s+', ' ', pageText).strip()
         token = tokenize(cleaned)
         page_simhash = Simhash(token)
         #print("working here2")
-        for url, simhash in cache.items():
+        #print("HHHHHHHHH:", url)
+        urls = url
+        for urls, simhash in cache.items():
             #fix with duct tape
             #print("working herezzz")
-            print(type(page_simhash), type(simhash))
+            #print(type(page_simhash), type(simhash))
 
             if page_simhash.distance(simhash) < 5:
                 print("working herereturn")
                 return []
         #print(print("working here3"))
-        cache[url] = page_simhash
+        #print("AAAAAAAAA:", url)
+        cache[urls] = page_simhash
+        #print("HHHHHHHHH:", url)
         #print("THIS IS CLEAN ||||||||||||||||", token, "\n")
         pageLength = len(cleaned.split())
         print(f"PAGE LENGTH: {pageLength}")
@@ -105,11 +109,13 @@ def scraper(url, resp):
                     word_counter[c.lower()] += 1
                 else:
                     word_counter[c.lower()] = 1
-        
+        #print(url)
         parsed = urlparse(url)
-        print(parsed.netloc)
+        #print(parsed.netloc)
         if parsed.netloc.endswith(".ics.uci.edu"):
+            #print(parsed.netloc)
             #print("ics domain")
+            #print(ics_domains)
             if parsed.netloc in ics_domains.keys():
                 ics_domains[parsed.netloc] += 1
             else:
@@ -208,7 +214,7 @@ def is_valid(url):
             return False
         #print(parsed.netloc)
         if not (parsed.netloc.endswith(".ics.uci.edu") or parsed.netloc.endswith(".cs.uci.edu") or parsed.netloc.endswith(".informatics.uci.edu") or parsed.netloc.endswith(".stat.uci.edu")):
-            print(f"rejected: |{parsed.netloc}|")
+            #print(f"rejected: |{parsed.netloc}|")
             
             return False
         
