@@ -223,7 +223,7 @@ def extract_next_links(url, resp):
         normalized_links = []
         try:
             # normalized_links = []
-            new_redirect_url = resp.raw_response.headers.get('Location')
+            new_redirect_url = resp.headers.get('Location')
 
             base_url = norm_url
             if new_redirect_url.startswith('http://') or new_redirect_url.startswith('https://'):
