@@ -200,6 +200,24 @@ def extract_next_links(url, resp):
         
        # print("Normalized_links:", normalized_links, "\n") 
         return normalized_links
+    elif response.status == 301 or response.status == 302 or response.status == 303 or response.status == 307 or response.status == 308:
+        normalized_links = []
+        try:
+            # normalized_links = []
+            new_redirect_url = resp.raw_response.headers.get('Location')
+
+            base_url = norm_url
+            if new_redirect_url.startswith('http://') or new_redirect_url.startswith('https://'):
+                full_link = new_redirect_url
+            else:
+                full_link = urljoin(base_url, new_redirect_url)
+            n_full_link = normalizer(full_link)
+            if n_full_link not in cache.keys():
+                    normalized_links.append(n_full_link)
+        except Exception as e:
+            print(e)
+        
+        return normalized_links
 
 #extract URL
 
