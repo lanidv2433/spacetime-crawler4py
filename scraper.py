@@ -219,7 +219,7 @@ def extract_next_links(url, resp):
         
        # print("Normalized_links:", normalized_links, "\n") 
         return normalized_links
-    elif resp.status == 301 or resp.status == 302 or resp.status == 303 or resp.status == 307 or resp.status == 308:
+    elif resp.status in [300,301,302,303,304,305,306,307,308,309]:
         normalized_links = []
         try:
             # normalized_links = []
