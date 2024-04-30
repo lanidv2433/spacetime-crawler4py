@@ -201,8 +201,9 @@ def extract_next_links(url, resp):
        # print("Normalized_links:", normalized_links, "\n") 
         return normalized_links
     elif response.status == 301 or response.status == 302 or response.status == 303 or response.status == 307 or response.status == 308:
+        normalized_links = []
         try:
-            normalized_links = []
+            # normalized_links = []
             new_redirect_url = resp.raw_response.headers.get('Location')
 
             base_url = norm_url
