@@ -90,6 +90,15 @@ def scraper(url, resp):
         #print("working here2")
         #print("HHHHHHHHH:", url)
         urls = url
+
+        domain = urlparse(url).netloc
+        if domain in depth:
+            depth[domain] = depth[domain] + 1
+        else:
+            depth[domain] = 1
+        if depth[domain] < 20:
+            return []
+            
         for urls, simhash in cache.items():
             #fix with duct tape
             #print("working herezzz")
@@ -140,15 +149,8 @@ def scraper(url, resp):
             #print("\n", [link for link in links if is_valid(link)])
             all_links = []
             for link in links:
-                domain = urlparse(link).netloc
-                if domain in depth:
-                    depth[domain] = depth[domain] + 1
-                else:
-                    depth[domain] = 1
-                if depth[domain] < 40:
-                    #print(f"THIS IS DEPTH OF {domain} |||||||||||||||||| {depth[domain]}\n")
-                    if is_valid(link):
-                        all_links.append(link)
+                if is_valid(link):
+                    all_links.append(link)
             #print("THIS IS LINKS |||||||||||||||||||||||", links, "\n")
             #print("extracted:", all_links)
             url_counter += len(all_links)
