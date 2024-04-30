@@ -214,6 +214,7 @@ def extract_next_links(url, resp):
             if n_full_link not in cache.keys():
                     normalized_links.append(n_full_link)
         except Exception as e:
+            print(e)
         
         return normalized_links
 
