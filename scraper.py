@@ -1,5 +1,5 @@
 import re
-from urllib import robotparser
+#from urllib import robotparser
 from urllib.parse import urlparse, urljoin, urlunparse
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -72,9 +72,9 @@ def scraper(url, resp):
     print(resp.url)
     print(resp.raw_response.url)
     print(resp.status)
-    #print(resp.raw_response.content)
-    #print("HHHHHHHHH:", url)
-    if robot_check(url) and length_check(resp):
+    
+    # if robot_check(url) and length_check(resp):
+    if length_check(resp):
         #print("work2")
         #print(f"THIS IS DEPTH OF {domain} |||||||||||||||||| {depth[domain]}\n")
 
@@ -273,22 +273,18 @@ def is_valid(url):
         raise
 
 
-def robot_check(url):
- # figure out what to do with robots.txt
-    robots_url = urljoin(url,'robots.txt')
-    robots = robotparser.RobotFileParser(robots_url)
-    try:
-        robots.read()
-        allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
-        #print(f"Fetch allowed: {allowed}, {robots_url}")  # Debug: Print if fetching is allowed
+# def robot_check(url):
+#     robots_url = urljoin(url,'robots.txt')
+#     robots = robotparser.RobotFileParser(robots_url)
+#     try:
+#         robots.read()
+#         allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
 
-        return allowed
-    except URLError as e:
-        print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
-        return False
-    #except Exception as e:
-    #    print(f"Unexpected error: {str(e)}")  # Debug: Print unexpected errors
-    #    return False
+#         return allowed
+#     except URLError as e:
+#         print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
+#         return False
+   
 
 def length_check(resp):
     #checks if content is None
