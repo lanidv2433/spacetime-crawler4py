@@ -89,27 +89,37 @@ def scraper(url, resp):
         page_simhash = Simhash(token)
         #print("working here2")
         #print("HHHHHHHHH:", url)
-        urls = url
+        urls = normalizer(url)
 
-        domain = urlparse(url).netloc
-        if domain in depth:
-            depth[domain] = depth[domain] + 1
-        else:
-            depth[domain] = 1
-        if depth[domain] < 20:
+        # domain = urlparse(url).netloc
+        # if domain in depth:
+        #     depth[domain] = depth[domain] + 1
+        # else:
+        #     depth[domain] = 1
+        # if depth[domain] < 20:
+        #     return []
+
+        if normalizer(url) not in depth:
+            depth[normalizer(url)] = 0
+
+        depth_cur = depth[normalizer(url)]
+        if depth_cur > 20:
+            print(depth)
+            # with open('discarded4.txt', 'a') as file:
+            #     file.write(f"{depth_cur}\n")
+            #     file.write(f"{url}\n")
             return []
             
-        for urls, simhash in cache.items():
-            #fix with duct tape
-            #print("working herezzz")
-            #print(type(page_simhash), type(simhash))
-
-            if page_simhash.distance(simhash) < 5:
-                print("working herereturn")
-                return []
-        #print(print("working here3"))
-        #print("AAAAAAAAA:", url)
-        cache[urls] = page_simhash
+        if len(cache) > 0: 
+              
+            for urls1, simhash in cache.items():
+                if page_simhash.distance(simhash) < 5:
+                    print("working herereturn")
+                    return []
+       
+            cache[urls] = page_simhash
+        else:
+            cache[urls] = page_simhash
         #print("HHHHHHHHH:", url)
         #print("THIS IS CLEAN ||||||||||||||||", token, "\n")
         pageLength = len(cleaned.split())
@@ -143,24 +153,27 @@ def scraper(url, resp):
             longestPage[0] = url
             longestPage[1] = pageLength
 
-        links = extract_next_links(url, resp)
-        if links:
-            #print("links")
-            #print("\n", [link for link in links if is_valid(link)])
-            all_links = []
-            for link in links:
-                if is_valid(link):
-                    all_links.append(link)
-            #print("THIS IS LINKS |||||||||||||||||||||||", links, "\n")
-            #print("extracted:", all_links)
-            url_counter += len(all_links)
-            #print("number of URLS:", url_counter)
-            #return [link for link in links if is_valid(link)]
-            return all_links
-        else:
-            #word_counter = dict(sorted(word_counter.items(), key=lambda item: item[1]))
-            return []
+        if depth_cur < 20:
+            links = extract_next_links(url, resp)
+            if links:
+                all_links = []
+                for link in links:
+                    if is_valid(link):
+                        #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                        depth[link] = depth_cur+1
+                        #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                        all_links.append(link)
+                url_counter += len(all_links)
+                #print(all_links)
+                linksCount += 1
+                return all_links
+            else:
+                print("no links")
+                return []
+            
+        return[] # THIS IS FOR THE NEW DEPTH THINGS B?UT HAJFJDAFJDSFJASDJFASJFASJDFASDFJAJSDFAJSDFAJSDF
     else:
+        print("DIDN'T PASS LENGTH CHECK")
         return []
 
 def extract_next_links(url, resp):
@@ -219,24 +232,24 @@ def extract_next_links(url, resp):
         
        # print("Normalized_links:", normalized_links, "\n") 
         return normalized_links
-    elif resp.status in [300,301,302,303,304,305,306,307,308,309]:
-        normalized_links = []
-        try:
-            # normalized_links = []
-            new_redirect_url = resp.headers.get('Location')
+    # elif resp.status in [300,301,302,303,304,305,306,307,308,309]:
+    #     normalized_links = []
+    #     try:
+    #         # normalized_links = []
+    #         new_redirect_url = resp.headers.get('Location')
 
-            base_url = norm_url
-            if new_redirect_url.startswith('http://') or new_redirect_url.startswith('https://'):
-                full_link = new_redirect_url
-            else:
-                full_link = urljoin(base_url, new_redirect_url)
-            n_full_link = normalizer(full_link)
-            if n_full_link not in cache.keys():
-                    normalized_links.append(n_full_link)
-        except Exception as e:
-            print(e)
+    #         base_url = norm_url
+    #         if new_redirect_url.startswith('http://') or new_redirect_url.startswith('https://'):
+    #             full_link = new_redirect_url
+    #         else:
+    #             full_link = urljoin(base_url, new_redirect_url)
+    #         n_full_link = normalizer(full_link)
+    #         if n_full_link not in cache.keys():
+    #                 normalized_links.append(n_full_link)
+    #     except Exception as e:
+    #         print(e)
         
-        return normalized_links
+    #     return normalized_links
 
 #extract URL
 
