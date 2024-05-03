@@ -113,7 +113,7 @@ def scraper(url, resp):
         if len(cache) > 0: 
               
             for urls1, simhash in cache.items():
-                if page_simhash.distance(simhash) < 5:
+                if page_simhash.distance(simhash) < 3:
                     print("working herereturn")
                     return []
        
