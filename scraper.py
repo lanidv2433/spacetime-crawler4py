@@ -232,24 +232,24 @@ def extract_next_links(url, resp):
         
        # print("Normalized_links:", normalized_links, "\n") 
         return normalized_links
-    # elif resp.status in [300,301,302,303,304,305,306,307,308,309]:
-    #     normalized_links = []
-    #     try:
-    #         # normalized_links = []
-    #         new_redirect_url = resp.headers.get('Location')
+    elif resp.status in [300,301,302,303,304,305,306,307,308,309]:
+        normalized_links = []
+        try:
+            # normalized_links = []
+            new_redirect_url = resp.headers.get('Location')
 
-    #         base_url = norm_url
-    #         if new_redirect_url.startswith('http://') or new_redirect_url.startswith('https://'):
-    #             full_link = new_redirect_url
-    #         else:
-    #             full_link = urljoin(base_url, new_redirect_url)
-    #         n_full_link = normalizer(full_link)
-    #         if n_full_link not in cache.keys():
-    #                 normalized_links.append(n_full_link)
-    #     except Exception as e:
-    #         print(e)
+            base_url = norm_url
+            if new_redirect_url.startswith('http://') or new_redirect_url.startswith('https://'):
+                full_link = new_redirect_url
+            else:
+                full_link = urljoin(base_url, new_redirect_url)
+            n_full_link = normalizer(full_link)
+            if n_full_link not in cache.keys():
+                    normalized_links.append(n_full_link)
+        except Exception as e:
+            print(e)
         
-    #     return normalized_links
+        return normalized_links
 
 #extract URL
 
@@ -286,17 +286,17 @@ def is_valid(url):
         raise
 
 
-# def robot_check(url):
-#     robots_url = urljoin(url,'robots.txt')
-#     robots = robotparser.RobotFileParser(robots_url)
-#     try:
-#         robots.read()
-#         allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
+def robot_check(url):
+    robots_url = urljoin(url,'robots.txt')
+    robots = robotparser.RobotFileParser(robots_url)
+    try:
+        robots.read()
+        allowed = robots.can_fetch("IR US24 43785070,25126906,66306666,36264445", url)
 
-#         return allowed
-#     except URLError as e:
-#         print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
-#         return False
+        return allowed
+    except URLError as e:
+        print(f"Failed to access {robots_url}: {e.reason}")  # Debug: Print error message
+        return False
    
 
 def length_check(resp):
